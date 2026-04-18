@@ -10,10 +10,21 @@ import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 
+function Splash() {
+  return (
+    <div style={{ height: '100dvh', background: '#000', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#1DB954" strokeWidth="1.5" strokeLinecap="round">
+        <path d="M2 12h1M5 8v8M9 5v14M13 3v18M17 6v12M21 9v6" />
+      </svg>
+      <div style={{ fontSize: 32, fontWeight: 900, color: '#1DB954', letterSpacing: 1 }}>Soundify</div>
+    </div>
+  );
+}
+
 function Guard({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
-  if (loading) return <div style={{ height: '100dvh', background: '#000' }} />;
+  if (loading) return <Splash />;
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
   return children;
 }

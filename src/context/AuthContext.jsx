@@ -19,7 +19,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     // Timeout so Supabase outages don't hang the app forever
-    const timeout = setTimeout(() => setLoading(false), 5000);
+    const timeout = setTimeout(() => setLoading(false), 2000);
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       clearTimeout(timeout);
