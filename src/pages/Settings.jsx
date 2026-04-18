@@ -88,7 +88,6 @@ export default function Settings() {
         />
       </div>
 
-      <div style={s.footer}>Soundify · Powered by AudD &amp; Claude AI</div>
     </div>
   );
 }
