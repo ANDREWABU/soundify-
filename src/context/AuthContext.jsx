@@ -9,7 +9,9 @@ export const GUEST_PROFILE = { name: 'Demo User', username: 'soundify_demo', ema
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Only show loading if there's an existing session to restore — otherwise show login immediately
+  const hasStoredSession = !!localStorage.getItem('sb-vnuhmcsoodgeuhbtgxop-auth-token');
+  const [loading, setLoading] = useState(hasStoredSession);
 
   const loadProfile = async (uid) => {
     const { data } = await supabase.from('profiles').select('*').eq('id', uid).single();

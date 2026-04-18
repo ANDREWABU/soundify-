@@ -69,7 +69,7 @@ export default function Home() {
           setErrorMsg('Connection failed — check your internet and try again.');
           setState(STATES.error);
         }
-      }, 8000);
+      }, 6000);
     } catch (e) {
       setErrorMsg(e.message?.includes('denied') ? 'Microphone permission denied.' : 'Microphone error.');
       setState(STATES.error);
