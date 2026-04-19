@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { startRecording, stopAndRecognize } from '../services/recognitionService';
+import { startRecording, startSystemAudioCapture, stopAndRecognize } from '../services/recognitionService';
 import { getSongInsights } from '../services/aiService';
 import { useLibrary } from '../context/LibraryContext';
 import { useAuth } from '../context/AuthContext';
@@ -17,6 +17,7 @@ function getGreeting(name) {
 
 export default function Home() {
   const [state, setState] = useState(STATES.idle);
+  const [captureMode, setCaptureMode] = useState('mic'); // 'mic' | 'playing'
   const [result, setResult] = useState(null);
   const [insights, setInsights] = useState(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
@@ -38,7 +39,11 @@ export default function Home() {
   const startIdentify = async () => {
     try {
       setState(STATES.listening);
-      await startRecording();
+      if (captureMode === 'playing') {
+        await startSystemAudioCapture();
+      } else {
+        await startRecording();
+      }
 
       timerRef.current = setTimeout(async () => {
         setState(STATES.processing);
@@ -161,6 +166,24 @@ export default function Home() {
               }
             </div>
           </div>
+
+          {/* Mode toggle — only shown when idle or error */}
+          {(state === STATES.idle || state === STATES.error) && (
+            <div style={styles.modeToggle}>
+              <button
+                style={{ ...styles.modeBtn, ...(captureMode === 'mic' ? styles.modeBtnActive : {}) }}
+                onClick={(e) => { e.stopPropagation(); setCaptureMode('mic'); }}
+              >
+                <MicIcon active={captureMode === 'mic'} /> Microphone
+              </button>
+              <button
+                style={{ ...styles.modeBtn, ...(captureMode === 'playing' ? styles.modeBtnActive : {}) }}
+                onClick={(e) => { e.stopPropagation(); setCaptureMode('playing'); }}
+              >
+                <PlayingIcon active={captureMode === 'playing'} /> Playing Now
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -239,6 +262,26 @@ export default function Home() {
         </div>
       )}
     </div>
+  );
+}
+
+function MicIcon({ active }) {
+  const c = active ? '#1DB954' : '#535353';
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round">
+      <rect x="9" y="2" width="6" height="12" rx="3"/>
+      <path d="M5 10a7 7 0 0 0 14 0M12 19v3M9 22h6"/>
+    </svg>
+  );
+}
+
+function PlayingIcon({ active }) {
+  const c = active ? '#1DB954' : '#535353';
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polygon points="10 8 16 12 10 16 10 8" fill={c} stroke="none"/>
+    </svg>
   );
 }
 
@@ -376,6 +419,18 @@ const styles = {
   similarNum: { fontSize: 13, color: '#535353', fontWeight: 700, width: 16, textAlign: 'center', flexShrink: 0 },
   similarTitle: { fontSize: 14, fontWeight: 600, color: '#fff' },
   similarArtist: { fontSize: 12, color: '#b3b3b3', marginTop: 1 },
+  modeToggle: {
+    display: 'flex', gap: 8, justifyContent: 'center',
+  },
+  modeBtn: {
+    display: 'flex', alignItems: 'center', gap: 6,
+    background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.08)',
+    color: '#535353', fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
+    padding: '8px 16px', borderRadius: 20, cursor: 'pointer', transition: 'all 0.2s',
+  },
+  modeBtnActive: {
+    background: 'rgba(29,185,84,0.12)', borderColor: '#1DB954', color: '#1DB954',
+  },
   recent: { position: 'relative', zIndex: 1, paddingBottom: 12, flexShrink: 0 },
   recentLabel: { fontSize: 15, fontWeight: 700, color: '#b3b3b3', padding: '0 20px 10px' },
   recentScroll: {
